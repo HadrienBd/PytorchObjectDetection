@@ -27,8 +27,8 @@ class Result {
 
 public class PrePostProcessor {
     // for yolov5 model, no need to apply MEAN and STD
-    static float[] NO_MEAN_RGB = new float[] {0.0f, 0.0f, 0.0f};
-    static float[] NO_STD_RGB = new float[] {1.0f, 1.0f, 1.0f};
+    static float[] NO_MEAN_RGB = new float[]{0.0f, 0.0f, 0.0f};
+    static float[] NO_STD_RGB = new float[]{1.0f, 1.0f, 1.0f};
 
     // model input image size
     static int mInputWidth = 640;
@@ -43,13 +43,14 @@ public class PrePostProcessor {
     static String[] mClasses;
 
     // The two methods nonMaxSuppression and IOU below are ported from https://github.com/hollance/YOLO-CoreML-MPSNNGraph/blob/master/Common/Helpers.swift
+
     /**
-     Removes bounding boxes that overlap too much with other boxes that have
-     a higher score.
-     - Parameters:
-     - boxes: an array of bounding boxes and their scores
-     - limit: the maximum number of boxes that will be selected
-     - threshold: used to decide whether boxes overlap too much
+     * Removes bounding boxes that overlap too much with other boxes that have
+     * a higher score.
+     * - Parameters:
+     * - boxes: an array of bounding boxes and their scores
+     * - limit: the maximum number of boxes that will be selected
+     * - threshold: used to decide whether boxes overlap too much
      */
     static ArrayList<Result> nonMaxSuppression(ArrayList<Result> boxes, int limit, float threshold) {
 
@@ -73,13 +74,13 @@ public class PrePostProcessor {
         // previous boxes), then repeat this procedure, until no more boxes remain
         // or the limit has been reached.
         boolean done = false;
-        for (int i=0; i<boxes.size() && !done; i++) {
+        for (int i = 0; i < boxes.size() && !done; i++) {
             if (active[i]) {
                 Result boxA = boxes.get(i);
                 selected.add(boxA);
                 if (selected.size() >= limit) break;
 
-                for (int j=i+1; j<boxes.size(); j++) {
+                for (int j = i + 1; j < boxes.size(); j++) {
                     if (active[j]) {
                         Result boxB = boxes.get(j);
                         if (IOU(boxA.rect, boxB.rect) > threshold) {
@@ -98,7 +99,7 @@ public class PrePostProcessor {
     }
 
     /**
-     Computes intersection-over-union overlap between two bounding boxes.
+     * Computes intersection-over-union overlap between two bounding boxes.
      */
     static float IOU(Rect a, Rect b) {
         float areaA = (a.right - a.left) * (a.bottom - a.top);
@@ -118,29 +119,29 @@ public class PrePostProcessor {
 
     static ArrayList<Result> outputsToNMSPredictions(float[] outputs, float imgScaleX, float imgScaleY, float ivScaleX, float ivScaleY, float startX, float startY) {
         ArrayList<Result> results = new ArrayList<>();
-        for (int i = 0; i< mOutputRow; i++) {
-            if (outputs[i* mOutputColumn +4] > mThreshold) {
-                float x = outputs[i* mOutputColumn];
-                float y = outputs[i* mOutputColumn +1];
-                float w = outputs[i* mOutputColumn +2];
-                float h = outputs[i* mOutputColumn +3];
+        for (int i = 0; i < mOutputRow; i++) {
+            if (outputs[i * mOutputColumn + 4] > mThreshold) {
+                float x = outputs[i * mOutputColumn];
+                float y = outputs[i * mOutputColumn + 1];
+                float w = outputs[i * mOutputColumn + 2];
+                float h = outputs[i * mOutputColumn + 3];
 
-                float left = imgScaleX * (x - w/2);
-                float top = imgScaleY * (y - h/2);
-                float right = imgScaleX * (x + w/2);
-                float bottom = imgScaleY * (y + h/2);
+                float left = imgScaleX * (x - w / 2);
+                float top = imgScaleY * (y - h / 2);
+                float right = imgScaleX * (x + w / 2);
+                float bottom = imgScaleY * (y + h / 2);
 
-                float max = outputs[i* mOutputColumn +5];
+                float max = outputs[i * mOutputColumn + 5];
                 int cls = 0;
-                for (int j = 0; j < mOutputColumn -5; j++) {
-                    if (outputs[i* mOutputColumn +5+j] > max) {
-                        max = outputs[i* mOutputColumn +5+j];
+                for (int j = 0; j < mOutputColumn - 5; j++) {
+                    if (outputs[i * mOutputColumn + 5 + j] > max) {
+                        max = outputs[i * mOutputColumn + 5 + j];
                         cls = j;
                     }
                 }
 
-                Rect rect = new Rect((int)(startX+ivScaleX*left), (int)(startY+top*ivScaleY), (int)(startX+ivScaleX*right), (int)(startY+ivScaleY*bottom));
-                Result result = new Result(cls, outputs[i*mOutputColumn+4], rect);
+                Rect rect = new Rect((int) (startX + ivScaleX * left), (int) (startY + top * ivScaleY), (int) (startX + ivScaleX * right), (int) (startY + ivScaleY * bottom));
+                Result result = new Result(cls, outputs[i * mOutputColumn + 4], rect);
                 results.add(result);
             }
         }
